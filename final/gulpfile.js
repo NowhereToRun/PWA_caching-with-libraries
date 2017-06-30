@@ -30,9 +30,9 @@ gulp.task('make-service-worker', function(callback) {
 		importScripts: ['config.js', 'sync.js'],
 		navigateFallback: 'message.html',
 		runtimeCaching: [
-		{
+		{	// fetchSubreddits()
 			urlPattern: /https:\/\/www\.reddit\.com\/api\/subreddits_by_topic.json?query=javascript/,
-			handler: 'cacheOnly',
+			handler: 'cacheFirst',
 			options: {
 				cache: {
 					name: 'subreddits'
@@ -49,7 +49,7 @@ gulp.task('make-service-worker', function(callback) {
 			}
 		},
 		{
-			urlPattern: /https:\/\/www\.reddit\.com\/r\/javascript\/comments\/\w{6}\/[\w]{0,255}\.json/,
+			urlPattern: /https:\/\/www\.reddit\.com\/r\/[javascript|node|reactnative|reactjs|web_design]\/comments\/\w{6}\/[\w]{0,255}\.json/,
 			handler: 'cacheFirst',
 			options: {
 			  	cache: {

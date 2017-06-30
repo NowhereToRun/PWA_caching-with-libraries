@@ -30,13 +30,13 @@ function createFullElement(elementName, attributeData) {
 }
 
 function fetchArticle(url) {
-  var req = new Request(url, {mode: 'cors'});      
+  var req = new Request(url, { mode: 'cors' });
   fetch(req).then(res => {
-    res.json().then( json => {
+    res.json().then(json => {
       var post = json[0];
       // var comments = json[1];
       var articleDiv = document.createElement('div');
-      post.data.children.forEach( child => {
+      post.data.children.forEach(child => {
         var heading = document.createElement('h3');
         var title = document.createTextNode(child.data.title);
         heading.appendChild(title);
@@ -74,9 +74,10 @@ function fetchArticle(url) {
 
 function fetchTopics(url) {
   if (url) {
-    fetch('https://www.reddit.com/r/' + url + '.json').then( response => {
+    fetch('https://www.reddit.com/r/' + url + '.json').then(response => {
       return response.json();
-    }).then( json => {
+    }).then(json => {
+      console.log(json);
       var articleList = createFullElement('ul', {
         'class': 'demo-list-three mdl-list'
       });
@@ -134,8 +135,8 @@ function fetchTopics(url) {
         articleItem.appendChild(primarySpan);
         articleList.appendChild(articleItem);
       };
-      if (contentEl.hasChildNodes) {
-        contentEl.removeChild(contentEl.firstChild);
+      if (contentEl.childElementCount > 1) {
+        contentEl.removeChild(contentEl.lastChild);
       }
       contentEl.appendChild(articleList);
     });
@@ -144,9 +145,9 @@ function fetchTopics(url) {
 
 function fetchSubreddits() {
   var subredditsByTopicUrl = 'https://www.reddit.com/api/subreddits_by_topic.json?query=javascript';
-  fetch(subredditsByTopicUrl).then( response => {
+  fetch(subredditsByTopicUrl).then(response => {
     return response.json();
-  }).then( json => {
+  }).then(json => {
     for (var k = 0; k < json.length; k++) {
       var linkEl = createFullElement('a', {
         'class': 'mdl-navigation__link',
@@ -156,15 +157,14 @@ function fetchSubreddits() {
       var linkText = document.createTextNode(json[k].name);
       linkEl.appendChild(linkText);
       var linkNode = navEl.appendChild(linkEl);
-
       linkNode.addEventListener('click', e => {
         fetchTopics(e.target.firstChild.nodeValue);
-        navigator.serviceWorker.ready.then( reg => {
+        navigator.serviceWorker.ready.then(reg => {
           return reg.sync.register('articles');
         })
       });
     }
-  }).catch( ex => {
+  }).catch(ex => {
     console.log('Parsing failed: ', ex);
   });
 }
@@ -172,7 +172,9 @@ function fetchSubreddits() {
 function getReddit() {
   fetchSubreddits();
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then( reg => {
+    navigator.serviceWorker.ready.then(reg => {
+      // 会激活sync文件夹下 self.addEventListener 'sync' 这里
+      // subreddits对应tag
       return reg.sync.register('subreddits');
     });
   }

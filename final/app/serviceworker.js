@@ -37,7 +37,7 @@
 /* eslint-disable indent, no-unused-vars, no-multiple-empty-lines, max-nested-callbacks, space-before-function-paren, quotes, comma-spacing */
 'use strict';
 
-var precacheConfig = [["/css/styles.css","06531eb581be93d0641d627b2f72af32"],["/images/dog.png","5d1bebbbbe167f7f7899c58fce24b642"],["/images/dog155x155.png","09794e445d6a6be7f9cbf0009c2a556d"],["/index.html","4b9b476261dfe1c6be6765e7957f9cbf"],["/js/redder.js","ac4fa3bbe44771dbe7aec2f74cc7a3f5"],["/message.html","f50459496ca85ed41a88c273240137b2"]];
+var precacheConfig = [["/css/material.indigo-deep_purple.min.css","faad0865eab96e1e0de73308083e23cb"],["/css/styles.css","5fb2c1d75be27cd4ce8796c2f6fdc437"],["/images/dog.png","5d1bebbbbe167f7f7899c58fce24b642"],["/images/dog155x155.png","09794e445d6a6be7f9cbf0009c2a556d"],["/index.html","a44e721a3f336a836d8bb9556b264250"],["/js/material.js","945d0f0b12db3f7e285b5cbfdd5c9742"],["/js/redder.js","e1083260bb99bbaef601780f54367db2"],["/message.html","651749dcbe495c1ff292c5abe88d0d6e"]];
 var cacheName = 'sw-precache-v3--' + (self.registration ? self.registration.scope : '');
 
 
@@ -208,6 +208,7 @@ self.addEventListener('activate', function(event) {
 
 
 self.addEventListener('fetch', function(event) {
+  console.log(event);
   if (event.request.method === 'GET') {
     // Should we call event.respondWith() inside this fetch event handler?
     // This needs to be determined synchronously, which will give other fetch
@@ -217,8 +218,9 @@ self.addEventListener('fetch', function(event) {
     // First, remove all the ignored parameters and hash fragment, and see if we
     // have that URL in our cache. If so, great! shouldRespond will be true.
     var url = stripIgnoredUrlParameters(event.request.url, ignoreUrlParametersMatching);
-    shouldRespond = urlsToCacheKeys.has(url);
-
+    console.log(url);
+    shouldRespond = urlsToCacheKeys.has(url);       // 这个是对命中precacheConfig的请求做处理
+    console.log(shouldRespond,'shouldRespond1');
     // If shouldRespond is false, check again, this time with 'index.html'
     // (or whatever the directoryIndex option is set to) at the end.
     var directoryIndex = 'index.html';
@@ -226,9 +228,11 @@ self.addEventListener('fetch', function(event) {
       url = addDirectoryIndex(url, directoryIndex);
       shouldRespond = urlsToCacheKeys.has(url);
     }
+    console.log(shouldRespond,'shouldRespond2');
 
     // If shouldRespond is still false, check to see if this is a navigation
     // request, and if so, whether the URL matches navigateFallbackWhitelist.
+    console.log('event.request.mode',event.request.mode);           // navigate
     var navigateFallback = 'message.html';
     if (!shouldRespond &&
         navigateFallback &&
@@ -240,6 +244,7 @@ self.addEventListener('fetch', function(event) {
 
     // If shouldRespond was set to true at any point, then call
     // event.respondWith(), using the appropriate cache key.
+    console.log(shouldRespond,'shouldRespond end');
     if (shouldRespond) {
       event.respondWith(
         caches.open(cacheName).then(function(cache) {
@@ -285,7 +290,7 @@ self.addEventListener('fetch', function(event) {
 
 // Runtime cache configuration, using the sw-toolbox library.
 
-toolbox.router.get(/https:\/\/www\.reddit\.com\/api\/subreddits_by_topic.json?query=javascript/, toolbox.cacheOnly, {"cache":{"name":"subreddits"}});
+toolbox.router.get(/https:\/\/www\.reddit\.com\/api\/subreddits_by_topic.json?query=javascript/, toolbox.cacheFirst, {"cache":{"name":"subreddits"}});
 toolbox.router.get(/https:\/\/www\.reddit\.com\/r\/\w{1,255}\.json/, toolbox.networkFirst, {"cache":{"name":"titles"}});
 toolbox.router.get(/https:\/\/www\.reddit\.com\/r\/javascript\/comments\/\w{6}\/[\w]{0,255}\.json/, toolbox.cacheFirst, {"cache":{"name":"articles"}});
 
